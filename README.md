@@ -36,7 +36,7 @@ python3 -m unittest discover -s tests -v
 
 ## ForgeOps CI/CD 发布
 
-项目已接入 `CSS-Deploy-Center`，生产发布分支为 `master`。中台通过仓库内的 `.github/workflows/deploy.yml` 触发自动测试、容器构建、Tailscale 私网传输、SSH 激活、健康检查和版本回滚。
+项目已接入 `CSS-Deploy-Center` 的中央部署流水线，生产发布分支为 `master`。Ontology 仓库只负责无生产密钥的自动测试和容器构建规范；Tailscale、SSH、服务器激活、健康检查和版本回滚统一由 CI/CD 中台执行。
 
 - 默认部署目录：`/opt/ontology-platform`
 - 默认服务端口：`8090`
@@ -44,14 +44,6 @@ python3 -m unittest discover -s tests -v
 - 默认资源：2 CPU / 2GB 内存
 - 版本策略：不可变版本目录，保留最近五个版本
 
-Ontology 仓库的 GitHub `production` Environment 需要配置：
-
-- `DEPLOY_HOST`
-- `DEPLOY_PORT`
-- `DEPLOY_USER`
-- `DEPLOY_SSH_KEY`
-- `DEPLOY_HOST_KEY`
-- `TS_OAUTH_CLIENT_ID`
-- `TS_OAUTH_SECRET`
+Ontology 仓库不保存服务器、SSH 或 Tailscale Secret。部署凭据只在 `CSS-Deploy-Center` 的 GitHub `production` Environment 配置一次；新增标准项目时只需在中台登记仓库、分支、端口、健康检查和资源档位。
 
 日常发布：代码合并并推送到 `master` 后，在 ForgeOps 中选择“汽车后市场 Ontology”，点击“发布最新版本”。回滚时点击“回滚上一版本”，业务数据不会被删除。

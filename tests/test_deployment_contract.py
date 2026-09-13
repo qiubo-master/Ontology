@@ -1,4 +1,3 @@
-import os
 import unittest
 from pathlib import Path
 
@@ -12,8 +11,6 @@ class DeploymentContractTests(unittest.TestCase):
             "Dockerfile",
             "docker-compose.yml",
             ".github/workflows/ci.yml",
-            ".github/workflows/deploy.yml",
-            "ops/deploy-ontology.sh",
         ):
             self.assertTrue((ROOT / relative).is_file(), relative)
 
@@ -22,15 +19,12 @@ class DeploymentContractTests(unittest.TestCase):
         self.assertIn('os.getenv("APP_HOST", "127.0.0.1")', source)
         self.assertIn('os.getenv("APP_PORT", "8000")', source)
 
-    def test_deployment_has_health_check_and_no_force_push(self):
-        workflow = (ROOT / ".github/workflows/deploy.yml").read_text(encoding="utf-8")
-        script = (ROOT / "ops/deploy-ontology.sh").read_text(encoding="utf-8")
-        self.assertIn("/api/health", script)
-        self.assertIn("--no-build --pull never", script)
-        self.assertNotIn("git push --force", workflow)
-        self.assertTrue(os.access(ROOT / "ops/deploy-ontology.sh", os.R_OK))
+    def test_ci_has_no_production_secrets(self):
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        self.assertNotIn("DEPLOY_SSH_KEY", workflow)
+        self.assertNotIn("TS_OAUTH_SECRET", workflow)
+        self.assertIn("docker build", workflow)
 
 
 if __name__ == "__main__":
     unittest.main()
-
