@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.~*.docx
+.venv/
+coverage/
+
+# Codex/local presentation build artifacts (not part of Ontology)
+.codex-finalizer/
+.ppt-build/
+ppt-output/

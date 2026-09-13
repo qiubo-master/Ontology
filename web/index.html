@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>曜途 · Ontology OS</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/styles-dynamic.css"></head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><b>曜</b><span><strong>曜途 AI</strong><small>Ontology OS</small></span></div>
+    <nav><button class="nav active" data-view="chat">◫　智能客服</button><button class="nav" data-view="reviews">✓　人工审核 <i id="badge">0</i></button><button class="nav" data-view="ontology">⌘　本体配置</button><button class="nav" data-view="operations">⌁　运营审计</button></nav>
+    <div class="env"><em></em><span><strong>MOCK 环境</strong><small>外部服务全部隔离</small></span></div>
+    <div class="user"><b>产</b><span><strong>产品管理员</strong><small>全局配置权限</small></span></div>
+  </aside>
+  <main>
+    <header><div><h1 id="title">智能客服</h1><p id="subtitle">以业务对象和证据驱动每一次回答与操作</p></div><span class="online"><i></i>Runtime 正常</span></header>
+
+    <section class="view active" id="chat">
+      <div class="chat-grid">
+        <article class="panel conversation">
+          <div class="panel-head"><strong>在线咨询　<small># DEMO-C1001</small></strong><button class="secondary" id="reset">新会话</button></div>
+          <div class="messages" id="messages"><div class="message bot"><b>曜</b><div><p>你好，我可以帮你选轮胎、查订单、预约门店、查询质保和售后进度。</p><small>基于 Ontology Runtime</small></div></div></div>
+          <div class="chips"><button>我的宝马3系想换轮胎，推荐静音的</button><button>查订单 SO20260001</button><button>取消预约 AP20260001</button><button>我要投诉门店态度很差</button></div>
+          <div id="intentPreview" class="intent-preview"><span class="preview-dot"></span><span>输入问题后自动识别意图</span></div>
+          <form id="chatForm"><textarea id="input" rows="1" placeholder="输入问题，例如：我的宝马3系适合什么轮胎？"></textarea><button>↑</button></form>
+        </article>
+        <aside class="panel trace">
+          <div class="panel-head"><span><small class="eyebrow">LIVE TRACE</small><strong>决策过程</strong></span><small id="traceId">等待请求</small></div>
+          <div class="empty" id="traceEmpty"><b>◎</b><p>开始输入后，这里会先识别意图；提交后动态展示完整决策链路。</p></div><div id="traceBody"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="view" id="reviews">
+      <div class="intro"><span><small class="eyebrow">HUMAN IN THE LOOP</small><h2>人工审核队列</h2><p>高风险动作执行前由有权限的坐席确认。</p></span><button class="secondary" id="refreshReviews">刷新</button></div>
+      <div class="review-grid"><article class="panel table-wrap"><table><thead><tr><th>优先级</th><th>用户诉求</th><th>意图 / 风险</th><th>拟执行动作</th><th>状态</th></tr></thead><tbody id="reviewRows"></tbody></table></article><aside class="panel inspector" id="reviewDetail"><div class="empty"><p>选择记录查看证据与动作边界。</p></div></aside></div>
+    </section>
+
+    <section class="view" id="ontology">
+      <div class="intro"><span><small class="eyebrow">BUSINESS SEMANTIC LAYER</small><h2>本体与能力配置</h2><p>意图是入口；Capability 才是稳定、跨渠道复用的业务契约。</p></span><button class="primary" id="publish">发布配置 v<span id="version">12</span></button></div>
+      <div class="stats"><article><small>意图</small><b id="intentCount">20</b><span>7 个一级分类</span></article><article><small>业务对象</small><b id="objectCount">10</b><span>统一语义与主键</span></article><article><small>能力</small><b id="capCount">13</b><span>跨渠道复用</span></article><article><small>规则</small><b id="ruleCount">5</b><span>可发布版本</span></article></div>
+      <div class="ontology-grid"><article class="panel"><div class="tabs"><button class="active" data-tab="intents">意图地图</button><button data-tab="objects">对象模型</button><button data-tab="capabilities">能力目录</button><button data-tab="rules">决策规则</button></div><div id="catalog"></div></article><aside class="panel inspector" id="configDetail"><small class="eyebrow">SELECT AN ITEM</small><h3>配置详情</h3><p>点击左侧条目查看版本、依赖和运行策略。</p></aside></div>
+    </section>
+
+    <section class="view" id="operations">
+      <div class="intro"><span><small class="eyebrow">OBSERVABILITY</small><h2>运营与审计</h2><p>每个结论都能回溯到对象、工具、证据、模型和操作人。</p></span><button class="secondary" id="refreshOps">刷新</button></div>
+      <div class="stats" id="metrics"></div>
+      <div class="ops-grid"><article class="panel"><div class="panel-head"><strong>实时审计事件</strong><small>最近 1,000 条</small></div><div id="audits" class="audits"></div></article><aside class="panel health"><div class="panel-head"><strong>依赖健康度</strong></div><div id="health"></div><div class="notice"><strong>演示隔离环境</strong><p>不会请求真实大模型、客户数据库或业务系统。</p></div></aside></div>
+    </section>
+  </main>
+</div>
+<div id="decisionModal" class="decision-modal" aria-hidden="true">
+  <button class="modal-backdrop" aria-label="关闭决策明细"></button>
+  <aside class="decision-drawer" role="dialog" aria-modal="true" aria-labelledby="decisionDetailTitle">
+    <div class="drawer-head"><span><small class="eyebrow">DECISION RECORD</small><h2 id="decisionDetailTitle">节点明细</h2></span><button id="closeDecision" aria-label="关闭">×</button></div>
+    <div id="decisionDetailBody" class="drawer-body"></div>
+  </aside>
+</div>
+<div id="toast"></div><script src="/app.js"></script>
+</body></html>
