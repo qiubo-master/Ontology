@@ -1,0 +1,26 @@
+name: ontology-platform
+
+services:
+  app:
+    image: ontology-platform:${ONTOLOGY_IMAGE_TAG:-latest}
+    pull_policy: never
+    build: .
+    restart: unless-stopped
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+    ports:
+      - "${ONTOLOGY_BIND_ADDRESS:-0.0.0.0}:${ONTOLOGY_HOST_PORT:-8090}:8000"
+    mem_limit: ${ONTOLOGY_APP_MEMORY:-1g}
+    cpus: ${ONTOLOGY_APP_CPU:-1.0}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    networks: [internal]
+
+networks:
+  internal:
+    driver: bridge
+

@@ -1,0 +1,11 @@
+.git
+.github
+.codex-finalizer
+.ppt-build
+__pycache__
+*.pyc
+*.docx
+ppt-output
+prd_assets
+tests
+

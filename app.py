@@ -1,5 +1,6 @@
 import json
 import mimetypes
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
@@ -100,6 +101,6 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    address = ("127.0.0.1", 8000)
+    address = (os.getenv("APP_HOST", "127.0.0.1"), int(os.getenv("APP_PORT", "8000")))
     print(f"Automotive Ontology MVP running at http://{address[0]}:{address[1]}")
     ThreadingHTTPServer(address, Handler).serve_forever()
