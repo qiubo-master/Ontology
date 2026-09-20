@@ -1,6 +1,6 @@
 import unittest
 
-from ontology.catalog import CAPABILITIES, INTENTS, OBJECT_TYPES, RULES
+from ontology.catalog import CAPABILITIES, INTENTS, OBJECT_TYPES, RULES, update_catalog_item
 from ontology.runtime import OntologyRuntime
 
 
@@ -42,6 +42,22 @@ class RuntimeTests(unittest.TestCase):
     def test_unknown_query_asks_for_clarification(self):
         result = self.runtime.handle_message("s4", "C1001", "阿巴阿巴")
         self.assertTrue(result["needs_clarification"])
+
+    def test_catalog_item_can_be_edited(self):
+        intent = next(item for item in INTENTS if item.id == "01-01")
+        original = intent.level2
+        try:
+            updated = update_catalog_item("intents", "01-01", {"id": "01-01", "level2": "轮胎智能选型"})
+            self.assertEqual(updated["level2"], "轮胎智能选型")
+            self.assertEqual(self.runtime.intents["01-01"].level2, "轮胎智能选型")
+        finally:
+            intent.level2 = original
+
+    def test_catalog_edit_rejects_invalid_reference_and_id_change(self):
+        with self.assertRaisesRegex(ValueError, "关联能力不存在"):
+            update_catalog_item("intents", "01-01", {"capability_id": "MissingCapability"})
+        with self.assertRaisesRegex(ValueError, "配置标识不可修改"):
+            update_catalog_item("rules", "R-001", {"id": "R-999"})
 
 
 if __name__ == "__main__": unittest.main()

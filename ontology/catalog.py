@@ -89,3 +89,71 @@ def catalog_payload():
         "rules": RULES,
     }
 
+
+CATALOG_COLLECTIONS = {
+    "intents": INTENTS,
+    "capabilities": CAPABILITIES,
+    "object_types": OBJECT_TYPES,
+    "rules": RULES,
+}
+
+
+def update_catalog_item(collection: str, item_id: str, changes: dict):
+    """Update one in-memory catalog item while preserving its stable identifier."""
+    if collection not in CATALOG_COLLECTIONS:
+        raise ValueError("不支持的配置类型")
+    if not isinstance(changes, dict):
+        raise ValueError("配置内容必须是 JSON 对象")
+    if changes.get("id", item_id) != item_id:
+        raise ValueError("配置标识不可修改")
+
+    items = CATALOG_COLLECTIONS[collection]
+    if collection == "capabilities":
+        item = items.get(item_id)
+    elif collection == "intents":
+        item = next((entry for entry in items if entry.id == item_id), None)
+    else:
+        item = next((entry for entry in items if entry["id"] == item_id), None)
+    if item is None:
+        raise KeyError("配置不存在")
+
+    allowed = {
+        "intents": {"level1", "level2", "capability_id", "risk", "keywords", "examples", "status", "version"},
+        "capabilities": {"name", "description", "required_objects", "functions", "actions", "knowledge_domains", "response_policy"},
+        "object_types": {"label", "key", "source", "properties"},
+        "rules": {"name", "condition", "effect", "priority", "version"},
+    }[collection]
+    unknown = set(changes) - allowed - {"id"}
+    if unknown:
+        raise ValueError(f"包含不可编辑字段: {', '.join(sorted(unknown))}")
+
+    list_fields = {"keywords", "examples", "required_objects", "functions", "actions", "knowledge_domains", "properties"}
+    for field in list_fields & changes.keys():
+        if not isinstance(changes[field], list) or not all(isinstance(value, str) for value in changes[field]):
+            raise ValueError(f"{field} 必须是字符串数组")
+    string_fields = allowed - list_fields - {"priority", "version"}
+    for field in string_fields & changes.keys():
+        if not isinstance(changes[field], str) or not changes[field].strip():
+            raise ValueError(f"{field} 必须是非空字符串")
+    if collection == "intents":
+        if "capability_id" in changes and changes["capability_id"] not in CAPABILITIES:
+            raise ValueError("关联能力不存在")
+        if "risk" in changes and changes["risk"] not in {"L1", "L2", "L3", "L4"}:
+            raise ValueError("风险等级必须是 L1、L2、L3 或 L4")
+    if collection == "capabilities" and "required_objects" in changes:
+        known_objects = {entry["id"] for entry in OBJECT_TYPES}
+        missing = set(changes["required_objects"]) - known_objects
+        if missing:
+            raise ValueError(f"关联对象不存在: {', '.join(sorted(missing))}")
+    if "priority" in changes and type(changes["priority"]) is not int:
+        raise ValueError("priority 必须是整数")
+    if "version" in changes and (type(changes["version"]) is not int or changes["version"] < 1):
+        raise ValueError("version 必须是正整数")
+
+    if collection in {"intents", "capabilities"}:
+        for field, value in changes.items():
+            if field != "id":
+                setattr(item, field, value)
+        return item.to_dict()
+    item.update({field: value for field, value in changes.items() if field != "id"})
+    return dict(item)

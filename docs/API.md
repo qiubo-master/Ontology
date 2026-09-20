@@ -6,6 +6,7 @@ All payloads are JSON. The demo server listens on `127.0.0.1:8000`.
 |---|---|---|
 | GET | `/api/health` | Service and adapter mode |
 | GET | `/api/catalog` | Intents, capabilities, objects, relations and rules |
+| PATCH | `/api/catalog/{collection}/{id}` | Validate and update one intent, capability, object type or rule |
 | POST | `/api/intent/preview` | Debounced intent preview while the user is typing |
 | POST | `/api/chat` | Execute one ontology runtime turn |
 | POST | `/api/actions/{id}/confirm` | Confirm a proposed Action |

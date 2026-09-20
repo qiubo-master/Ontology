@@ -5,7 +5,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
-from ontology.catalog import CAPABILITIES, catalog_payload
+from ontology.catalog import CAPABILITIES, catalog_payload, update_catalog_item
 from ontology.runtime import OntologyRuntime
 
 
@@ -28,7 +28,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
         self.end_headers()
         self.wfile.write(body)
 
@@ -36,7 +36,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
         self.end_headers()
 
     def read_json(self):
@@ -81,6 +81,27 @@ class Handler(BaseHTTPRequestHandler):
                 runtime.store.audit("config", "config.published", data.get("actor", "product-admin"), {"version": runtime.store.config_version, "change": data.get("change", "演示配置发布")})
                 return self.send_json({"status": "published", "version": runtime.store.config_version})
             return self.send_json({"error": "not found"}, 404)
+        except KeyError as exc:
+            return self.send_json({"error": str(exc)}, 404)
+        except Exception as exc:
+            return self.send_json({"error": str(exc)}, 500)
+
+    def do_PATCH(self):
+        path = urlparse(self.path).path
+        try:
+            data = self.read_json()
+            parts = path.strip("/").split("/")
+            if len(parts) == 4 and parts[:2] == ["api", "catalog"]:
+                collection, item_id = parts[2], parts[3]
+                updated = update_catalog_item(collection, item_id, data)
+                runtime.store.audit(
+                    "config", "config.updated", self.headers.get("X-Actor", "product-admin"),
+                    {"collection": collection, "item_id": item_id, "changes": sorted(key for key in data if key != "id")},
+                )
+                return self.send_json({"status": "updated", "item": updated})
+            return self.send_json({"error": "not found"}, 404)
+        except ValueError as exc:
+            return self.send_json({"error": str(exc)}, 400)
         except KeyError as exc:
             return self.send_json({"error": str(exc)}, 404)
         except Exception as exc:
